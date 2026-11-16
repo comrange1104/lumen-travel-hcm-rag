@@ -27,8 +27,8 @@ def scenes(script_path):
     if len(voice) != 11:
         raise ValueError('Kịch bản cần 11 đoạn lời thoại. Kiểm tra docs/VIDEO_SCRIPT.md.')
     return [
-        Scene('intro', 12, 'Lumen Travel · Trần Hải Thiên · 25127007', voice[0]),
-        Scene('auth', 12, 'Firebase Authentication', 'Đây là phiên đăng nhập thật qua Firebase Authentication. Trang chat chỉ được mở sau khi xác thực thành công.'),
+        Scene('intro', 12, 'Lumen Travel', voice[0]),
+        Scene('auth', 12, 'Firebase Authentication', 'Ứng dụng dùng Firebase Authentication để xác thực tài khoản. Trang chat chỉ được mở sau khi đăng nhập thành công.'),
         Scene('ask_positive', 4, 'Gửi câu hỏi có đáp án', 'Em hỏi: Dinh Độc Lập do ai thiết kế?'),
         Scene('abstraction', 30, 'Abstraction · Trừu tượng hóa', voice[5]),
         Scene('decomposition', 35, 'Decomposition · Chia nhỏ bài toán', voice[6]),

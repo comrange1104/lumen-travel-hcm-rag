@@ -6,8 +6,8 @@
 2. Launcher kiểm tra cấu hình, khởi động Ollama nếu cần, gia hạn tunnel Pinggy nếu đường cũ hết hiệu lực và mở trang http://localhost:8503.
 3. Đăng nhập bằng tài khoản Firebase đã đăng ký. Đây là bước xác thực thật; ứng dụng không lưu mật khẩu để tự đăng nhập.
 4. Bấm **1. Chuẩn bị cẩm nang**, đợi báo sẵn sàng. Bước này tạo/lấy chỉ mục thật trước khi quay.
-5. Chọn có/không hiện lời thoại. Bấm **2. Bắt đầu**, rồi bấm quay màn hình trong 8 giây đếm ngược.
-6. Từ đây không cần nhập câu hỏi hay chuyển cảnh. Khi hiện **TRÌNH DIỄN ĐÃ KẾT THÚC**, dừng quay.
+5. Chọn có/không **Hiện nội dung thuyết trình**. Bấm **2. Bắt đầu**, rồi bấm quay màn hình trong 8 giây đếm ngược.
+6. Từ đây không cần nhập câu hỏi hay chuyển cảnh. Chữ lớn được căn giữa và tự chuyển từng cụm theo thời gian đọc. Khi màn hình kết thúc hiện **Hoàn tất**, dừng quay.
 7. Tải `lumen-demo.srt` và `lumen-timeline.json` ở cuối trang để ghép phụ đề/giọng đọc sau đó. Mốc 0 của phụ đề là lúc phần giới thiệu bắt đầu, sau đếm ngược; cắt phần đếm ngược của clip để khớp.
 
 Để có thao tác đăng nhập trong bài nộp, quay thêm đoạn đăng nhập thật từ bước 3. Có thể quay liên tục rồi cắt phần chuẩn bị/đếm ngược, hoặc ghép đoạn đăng nhập trước phần tự trình diễn. Màn hình “Firebase Authentication” trong phần tự chạy chỉ xác nhận phiên đã đăng nhập, không giả lập thao tác nhập mật khẩu.
@@ -31,7 +31,7 @@ Nếu thời lượng vượt 5 phút, rút ngắn đoạn chờ trong phần m�
 ## Khi có lỗi
 
 - Mất mạng, Ollama/Pinggy lỗi hoặc câu trả lời chưa đạt kỳ vọng: demo dừng và hiện thông báo; không thay kết quả bằng đáp án mẫu.
-- Nút **Dừng / chuẩn bị quay lại** dừng lịch chuyển cảnh. Một HTTP request đã chạy có thể cần đợi hoàn tất trước khi quay lại.
+- Di chuột xuống góc phải dưới, mở menu **⋯** để bật/tắt nội dung chữ hoặc chọn **Dừng / chuẩn bị quay lại**. Bộ đếm, thanh tiến trình, nhãn điều khiển và nhãn “Lời thuyết minh” không xuất hiện trong phần đang quay. Một HTTP request đã chạy có thể cần đợi hoàn tất trước khi quay lại.
 - Mở lại `QUAY_DEMO.bat` để kiểm tra các dịch vụ. Nếu có thay đổi cấu hình Firebase, khởi động lại trang demo để nạp cấu hình mới.
 - Phiên đăng xuất ở cuối demo là phiên của trang 8503; một phiên độc lập ở trang 8501 không bị đăng xuất theo.
 
