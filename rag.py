@@ -8,6 +8,7 @@ import numpy as np
 import requests
 import streamlit as st
 from config import OLLAMA_NUM_GPU
+from ollama_runtime import is_pinggy_url, recover_tunnel, ConnectionSetupError
 
 UNKNOWN = 'Mình không có thông tin này trong cẩm nang.'
 EMBED_MODEL = 'embeddinggemma'
@@ -17,7 +18,13 @@ MODEL_LOCK = threading.Lock()
 
 
 class RagError(Exception):
-    pass
+    def __init__(self, message, code='rag'):
+        super().__init__(message)
+        self.code = code
+
+    @property
+    def public_message(self):
+        return str(self)
 
 
 def load_guide(raw):
@@ -54,18 +61,46 @@ class OllamaClient:
             raise RagError('OLLAMA_NUM_GPU cần để trống hoặc là số nguyên không âm; 0 để chạy CPU.') from None
 
     def _post(self, endpoint, payload):
-        try:
-            response = requests.post(self.base_url + endpoint, json=payload, timeout=(10, 180))
+        for attempt in range(2):
+            try:
+                response = requests.post(self.base_url + endpoint, json=payload, timeout=(10, 180))
+            except requests.ReadTimeout:
+                raise RagError('Ollama xử lý quá 180 giây. Đợi tác vụ cũ kết thúc rồi thử lại; không cần đổi câu hỏi.', 'timeout') from None
+            except requests.RequestException:
+                if attempt == 0 and self._recover_connection():
+                    continue
+                raise RagError('Không kết nối được Ollama qua địa chỉ đã cấu hình. Kiểm tra Internet và dịch vụ.', 'connection') from None
+            transient = response.status_code in (410, 502, 503, 504)
+            if response.status_code == 404 and 'text/html' in str(response.headers.get('content-type', '')):
+                transient = True
+            if transient:
+                if attempt == 0 and self._recover_connection():
+                    continue
+                raise RagError('Tunnel Pinggy hoặc dịch vụ Ollama đang ngắt kết nối. Hãy thử lại sau khi dịch vụ phục hồi.', 'connection')
             if response.status_code == 404:
                 raise RagError('Không tìm thấy mô hình hoặc endpoint. Kiểm tra URL và tải embeddinggemma, qwen3:4b.')
             if not response.ok:
                 raise RagError('Ollama không xử lý được yêu cầu. Kiểm tra bộ nhớ, mô hình và tunnel Pinggy.')
-            data = response.json()
+            try:
+                data = response.json()
+            except ValueError:
+                if attempt == 0 and is_pinggy_url(self.base_url) and 'text/html' in str(response.headers.get('content-type', '')) and self._recover_connection():
+                    continue
+                raise RagError('Server trả dữ liệu không hợp lệ thay vì JSON của Ollama.', 'response') from None
+            if not isinstance(data, dict):
+                raise RagError('Server trả dữ liệu không hợp lệ thay vì JSON của Ollama.', 'response')
             if 'error' in data:
                 raise RagError('Ollama báo lỗi. Kiểm tra mô hình và bộ nhớ của server.')
             return data
-        except (requests.RequestException, ValueError):
-            raise RagError('Không kết nối được Ollama. Kiểm tra server và mở lại Pinggy nếu tunnel đã hết hạn.') from None
+
+    def _recover_connection(self):
+        if not is_pinggy_url(self.base_url):
+            return False
+        try:
+            self.base_url = recover_tunnel(self.base_url)
+            return True
+        except ConnectionSetupError as exc:
+            raise RagError(str(exc), 'connection') from None
 
     def embed(self, texts):
         with MODEL_LOCK:

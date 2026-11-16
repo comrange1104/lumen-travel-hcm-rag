@@ -4,6 +4,9 @@ from concurrent.futures import Future
 from pathlib import Path
 import re
 import textwrap
+import logging
+
+logger = logging.getLogger('lumen.recording')
 
 
 QUESTIONS = {
@@ -27,18 +30,18 @@ def scenes(script_path):
     if len(voice) != 11:
         raise ValueError('Kịch bản cần 11 đoạn lời thoại. Kiểm tra docs/VIDEO_SCRIPT.md.')
     return [
-        Scene('intro', 12, 'Lumen Travel', voice[0]),
-        Scene('auth', 12, 'Firebase Authentication', 'Ứng dụng dùng Firebase Authentication để xác thực tài khoản. Trang chat chỉ được mở sau khi đăng nhập thành công.'),
-        Scene('ask_positive', 4, 'Gửi câu hỏi có đáp án', 'Em hỏi: Dinh Độc Lập do ai thiết kế?'),
-        Scene('abstraction', 30, 'Abstraction · Trừu tượng hóa', voice[5]),
-        Scene('decomposition', 35, 'Decomposition · Chia nhỏ bài toán', voice[6]),
-        Scene('positive_result', 14, 'Kết quả câu hỏi có đáp án', voice[2]),
-        Scene('ask_negative', 4, 'Gửi câu hỏi ngoài cẩm nang', 'Tiếp theo là câu hỏi ngoài cẩm nang.'),
-        Scene('pattern', 35, 'Pattern recognition · Nhận diện mẫu', voice[7]),
-        Scene('algorithm', 45, 'Algorithm design · Thiết kế thuật toán', voice[8]),
-        Scene('negative_result', 12, 'Kết quả câu hỏi ngoài cẩm nang', voice[3]),
-        Scene('logout', 8, 'Đăng xuất · Xóa lịch sử phiên', voice[4]),
-        Scene('tests', 45, 'Kiểm thử · Thành công và giới hạn', voice[9]),
+        Scene('intro', 10, 'Lumen Travel', voice[0]),
+        Scene('auth', 8, 'Đăng nhập', 'Ứng dụng dùng Firebase Authentication để xác thực tài khoản. Trang chat chỉ được mở sau khi đăng nhập thành công.'),
+        Scene('ask_positive', 3, 'Câu hỏi về Dinh Độc Lập', 'Em hỏi: Dinh Độc Lập do ai thiết kế?'),
+        Scene('positive_result', 16, 'Câu trả lời và nguồn', voice[2]),
+        Scene('ask_negative', 3, 'Câu hỏi ngoài cẩm nang', 'Tiếp theo là câu hỏi ngoài cẩm nang.'),
+        Scene('negative_result', 14, 'Khi cẩm nang thiếu dữ kiện', voice[3]),
+        Scene('logout', 7, 'Đăng xuất', voice[4]),
+        Scene('abstraction', 26, 'Abstraction', voice[5]),
+        Scene('decomposition', 31, 'Decomposition', voice[6]),
+        Scene('pattern', 28, 'Pattern recognition', voice[7]),
+        Scene('algorithm', 38, 'Algorithm design', voice[8]),
+        Scene('tests', 34, 'Kết quả kiểm thử', voice[9]),
         Scene('closing', 10, 'Hạn chế và kết thúc', voice[10]),
     ]
 
@@ -46,6 +49,7 @@ def scenes(script_path):
 class DemoRun:
     """Clock and future state only; no Streamlit calls from worker threads."""
     def __init__(self, scene_list, now, countdown=8):
+        self.version = 2
         self.scenes = scene_list
         self.epoch = now + countdown
         self.position = -1
@@ -56,6 +60,33 @@ class DemoRun:
         self.error = None
         self.complete = False
         self.signed_out = False
+        self.error_kind = None
+
+    def _fail(self, message, kind, exc=None):
+        self.error_kind = kind
+        detail = getattr(exc, 'public_message', '') if exc else ''
+        self.error = message + ('\n\n' + detail if detail else '')
+        if exc:
+            logger.error('Recording question failed: %s', type(exc).__name__, exc_info=(type(exc), exc, exc.__traceback__))
+
+    def retry(self, now, submit):
+        kind = self.error_kind
+        if self.signed_out or kind not in QUESTIONS:
+            return False
+        old_job = self.jobs.get(kind)
+        if old_job is not None and not old_job.done():
+            return False
+        try:
+            self.jobs[kind] = submit(QUESTIONS[kind])
+        except Exception as exc:
+            self._fail('Chưa thể gửi lại câu hỏi.', kind, exc)
+            return False
+        self.results.pop(kind, None)
+        self.error = None
+        self.error_kind = None
+        self.entered = now
+        self.events[-1]['speech_at'] = None if self.scene.key.endswith('_result') else round(now-self.epoch, 3)
+        return True
 
     @property
     def scene(self):
@@ -73,8 +104,8 @@ class DemoRun:
             kind = scene.key.removeprefix('ask_')
             try:
                 self.jobs[kind] = submit(QUESTIONS[kind])
-            except Exception:
-                self.error = 'Không khởi tạo được câu hỏi thật. Kiểm tra đăng nhập, cấu hình Ollama và chuẩn bị lại.'
+            except Exception as exc:
+                self._fail('Không khởi tạo được câu hỏi.', kind, exc)
         if scene.key == 'logout':
             self.signed_out = True
             self.results.clear()
@@ -88,8 +119,8 @@ class DemoRun:
                 try:
                     result = job.result()
                     self.results[kind] = result.to_dict() if hasattr(result, 'to_dict') else result
-                except Exception:
-                    self.error = 'Không lấy được phản hồi thật từ Ollama. Dừng quay, kiểm tra server/Pinggy rồi chuẩn bị lại.'
+                except Exception as exc:
+                    self._fail('Chưa lấy được phản hồi từ mô hình.', kind, exc)
                     return
         if self.position < 0:
             self._enter(0, now, submit)
@@ -99,13 +130,13 @@ class DemoRun:
             kind = key.removesuffix('_result')
             if kind not in self.results:
                 if now - self.entered > 180:
-                    self.error = 'Mô hình chờ quá lâu. Dừng quay và kiểm tra kết nối.'
+                    self._fail('Mô hình chờ quá lâu. Đợi tác vụ cũ kết thúc rồi thử lại.', kind)
                 return
             result = self.results[kind]
             valid = (result['status'] == 'answered' and 'G02' in result['source_ids']
                      and 'ngô viết thụ' in result['answer'].casefold()) if kind == 'positive' else result['status'] == 'unknown'
             if not valid:
-                self.error = 'Kết quả thật chưa đạt kỳ vọng của kịch bản. Demo đã dừng; hãy đối chiếu đáp án bên dưới trước khi quay lại.'
+                self._fail('Kết quả chưa đạt kỳ vọng của kịch bản. Hãy đối chiếu đáp án bên dưới.', kind)
                 return
             if self.events[-1]['speech_at'] is None:
                 self.entered = now

@@ -6,7 +6,7 @@ Streamlit + Firebase Authentication + Ollama RAG. Cẩm nang 16 mục tiếng Vi
 
 ## Tình trạng bàn giao
 
-- Mã nguồn, dữ liệu và kịch bản video đã có trong repo. **21/21 kiểm thử tự động đã đạt ngày 16/11/2026** trên Python 3.12, bao gồm Streamlit AppTest với Firebase giả lập và bộ điều khiển demo tự chạy; đây chưa phải xác nhận Firebase/mô hình thật.
+- Mã nguồn, dữ liệu và kịch bản video đã có trong repo. **29/29 kiểm thử tự động đã đạt ngày 16/11/2026** trên Python 3.12, bao gồm Streamlit AppTest với Firebase giả lập, bộ điều khiển demo và xử lý kết nối; đây chưa phải xác nhận Firebase/mô hình thật.
 - Cần cấu hình Firebase và xác minh đăng nhập thật bằng tài khoản của sinh viên.
 - **6/6 câu hỏi chính đã đạt ngày 16/11/2026 qua Pinggy, embeddinggemma và qwen3:4b chạy CPU.** Codex đã đối chiếu câu trả lời với cẩm nang; sinh viên cần duyệt trước khi nộp. Bằng chứng: [kết quả thật](docs/evaluation-real.json).
 - **Video:** CHƯA CÓ — sinh viên quay theo `docs/VIDEO_SCRIPT.md`, tải lên và thay dòng này bằng link xem được.
@@ -110,7 +110,7 @@ Embedding toàn cẩm nang dùng `st.cache_resource`; khóa cache chứa nội d
 
 Bấm đúp **QUAY_DEMO.bat**, đăng nhập tại http://localhost:8503, bấm **Chuẩn bị cẩm nang**, sau đó **Bắt đầu**. Trang đếm ngược 8 giây để bạn bấm quay, tự gửi hai câu hỏi thật, mở nguồn, trình bày Computational Thinking, đăng xuất và hiện báo cáo kiểm thử đã lưu. Cuối buổi có phụ đề SRT và timeline để tải về. Xem [hướng dẫn quay tự động](docs/AUTO_DEMO.md).
 
-Lịch cơ sở khoảng 4:26; thời gian mô hình chờ thêm có thể làm video dài hơn 5 phút. Demo dừng nếu dịch vụ lỗi hoặc kết quả không đạt kỳ vọng, không thay bằng đáp án mẫu. Thao tác đăng nhập thật thực hiện trước khi tự trình diễn; quay thêm đoạn này để đáp ứng phần demo đăng nhập của đề.
+Lịch cảnh khoảng 3:48, cộng thời gian chờ mô hình có thể làm video dài hơn 5 phút. Trình tự được giữ liền mạch: hỏi–đáp và nguồn → đăng xuất → bốn phần phân tích → kiểm thử. Client kiểm tra kết nối trước quay, tự thử khôi phục tunnel Pinggy và gửi lại một lần khi kết nối ngắt; lỗi còn lại có nguyên nhân rõ ràng và nút thử lại. Không tự lặp tác vụ đọc quá thời gian hoặc thay bằng đáp án mẫu. Thao tác đăng nhập thật thực hiện trước khi tự trình diễn; quay thêm đoạn này để đáp ứng phần demo đăng nhập của đề.
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v

@@ -1,6 +1,7 @@
 from concurrent.futures import Future
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 from config import ROOT
@@ -17,7 +18,10 @@ class RecordingTests(unittest.TestCase):
     def test_script_timeline_has_required_parts(self):
         data = scenes(ROOT/'docs/VIDEO_SCRIPT.md')
         self.assertEqual(len(data), 13)
-        self.assertEqual(sum(s.seconds for s in data), 266)
+        self.assertEqual(sum(s.seconds for s in data), 228)
+        keys = [s.key for s in data]
+        self.assertLess(keys.index('negative_result'), keys.index('logout'))
+        self.assertLess(keys.index('logout'), keys.index('abstraction'))
         self.assertTrue(all(s.speech for s in data))
 
     def test_waits_for_real_result_and_allows_reading_after_arrival(self):
@@ -72,6 +76,17 @@ class RecordingTests(unittest.TestCase):
         self.assertEqual(len(app.chat_input), 0)
         self.assertFalse(any('Bắt đầu' in b.label for b in app.button))
 
+    def test_legacy_failed_session_returns_to_preparation_without_losing_login(self):
+        app = AppTest.from_file(str(ROOT/'record_demo.py'))
+        app.session_state['user'] = {'email': 'demo@example.test', 'uid': 'test',
+                                     'expires_at': time.time()+3600, 'id_token': 'test', 'refresh_token': 'test'}
+        app.session_state['record_run'] = SimpleNamespace(jobs={}, error='old failure')
+        app.run()
+        self.assertFalse(app.exception)
+        self.assertNotIn('record_run', app.session_state)
+        self.assertIn('user', app.session_state)
+        self.assertTrue(any('Chuẩn bị' in b.label for b in app.button))
+
     def test_every_presentation_scene_renders(self):
         scene_list = scenes(ROOT/'docs/VIDEO_SCRIPT.md')
         for position, scene in enumerate(scene_list):
@@ -119,11 +134,37 @@ class RecordingTests(unittest.TestCase):
         app.session_state['user'] = {'email': 'demo@example.test', 'uid': 'test',
                                      'expires_at': time.time()+3600, 'id_token': 'test', 'refresh_token': 'test'}
         app.run()
-        with patch('rag.build_index', return_value=([], [])), patch('rag.answer_question') as answer:
+        with patch('rag.build_index', return_value=([], [])), patch('rag.answer_question') as answer, patch('ollama_runtime.ensure_connection', return_value='http://localhost:11434'):
             app.button[0].click().run()
             self.assertFalse(app.exception)
             self.assertTrue(any('Bắt đầu' in b.label for b in app.button))
             answer.assert_not_called()
+
+    def test_failure_retains_safe_reason_and_can_retry(self):
+        from rag import RagError
+        failed = Future()
+        failed.set_exception(RagError('Tunnel không còn kết nối.', 'connection'))
+        run = DemoRun([Scene('ask_positive', 1, 'Ask', 'Ask'), Scene('positive_result', 1, 'Result', 'Read')], 0, 0)
+        run.tick(0, lambda _: failed)
+        with self.assertLogs('lumen.recording', level='ERROR'):
+            run.tick(1, lambda _: failed)
+        self.assertIn('Tunnel không còn kết nối.', run.error)
+        retry = Future()
+        self.assertTrue(run.retry(2, lambda _: retry))
+        self.assertIsNone(run.error)
+        retry.set_result(response('positive'))
+        for now in range(3, 8):
+            run.tick(now, lambda _: self.fail('Duplicate request'))
+        self.assertTrue(run.complete)
+
+    def test_no_duplicate_retry_while_timed_out_job_is_still_running(self):
+        job = Future()
+        run = DemoRun([Scene('ask_positive', 1, 'Ask', 'Ask'), Scene('positive_result', 1, 'Result', 'Read')], 0, 0)
+        run.tick(0, lambda _: job)
+        run.tick(1, lambda _: job)
+        run.tick(182, lambda _: job)
+        self.assertIsNotNone(run.error)
+        self.assertFalse(run.retry(183, lambda _: self.fail('Must not duplicate an in-flight job')))
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ from firebase_client import sign_in, refresh_user, FirebaseError
 from rag import build_index, OllamaClient, answer_question, RagError
 from recording import DemoRun, QUESTIONS, scenes, subtitles
 import recording_ui as ui
+import ollama_runtime
 
 
 def current_url():
@@ -16,6 +17,11 @@ def current_url():
     return (dotenv_values(ROOT/'.env').get('OLLAMA_BASE_URL') or OLLAMA_BASE_URL).rstrip('/')
 
 st.set_page_config(page_title='Lumen Travel · Trình bày đồ án', page_icon='🌿', layout='wide')
+previous_run = st.session_state.get('record_run')
+if previous_run is not None and getattr(previous_run, 'version', None) != 2:
+    for job in previous_run.jobs.values():
+        job.cancel()
+    st.session_state.pop('record_run', None)
 ui.apply_style(st.session_state.get('record_run') is not None)
 if st.session_state.get('record_run') is None:
     st.title('🌿 Lumen Travel')
@@ -33,35 +39,22 @@ def clear_private_state():
 
 
 def render_result(kind, run):
-    with st.chat_message('user'):
-        st.write(QUESTIONS[kind])
     result = run.results.get(kind)
     if not result:
         ui.body('Đang tra cứu cẩm nang…')
         return
     ui.body(result['answer'], kind='answer')
-    columns = st.columns(3)
-    for col, item in zip(columns, result['retrieved_entries']):
-        entry = item['entry']
-        with col, st.container(border=True):
-            st.markdown(f"**[{entry['id']}] {entry['title']}**")
-            st.caption(f"Cosine: {item['score']:.3f}")
-            st.write(entry['text'])
-            st.link_button('Nguồn tham khảo', entry['source'])
+    ui.sources(result)
 
 
 def render_tests():
     st.caption('Kết quả kiểm thử · 16/11/2026')
     data = json.loads((ROOT/'docs/evaluation-real.json').read_text(encoding='utf-8'))
-    rows = []
-    for item in data:
-        if item['id'] in ('T01', 'T05', 'E01'):
-            rows.append({'Test': item['id'], 'Câu hỏi': item['question'],
-                         'ID kỳ vọng': ', '.join(item['expected_ids']) or 'Không có dữ kiện',
-                         'ID truy xuất': ', '.join(item['retrieved_ids']),
-                         'Kết quả': 'Đạt' if item['passed_automatic'] else 'Chưa đạt — retrieval'})
-    st.table(rows)
-    ui.body('E01: top-3 thiếu G08 nên chưa đủ dữ kiện để liệt kê bốn bảo tàng. T05 đạt vì cẩm nang không có giá vé.')
+    by_id = {item['id']: item for item in data}
+    good, failure = by_id['T01'], by_id['E01']
+    ui.cards([('T01 · Thành công', f"{good['question']}\nKỳ vọng: G02.\nKết quả: {good['answer']}"),
+              ('E01 · Giới hạn truy xuất', 'Yêu cầu liệt kê bốn bảo tàng.\nCần: G03, G08, G09, G10.\nĐã lấy: '+', '.join(failure['retrieved_ids'])+'.\nThiếu G08 → context chưa đủ.')])
+    ui.body('6/6 câu hỏi chính đạt · E01 ghi nhận giới hạn top-3', kind='footnote')
 
 
 run = st.session_state.get('record_run')
@@ -95,19 +88,25 @@ if not public_tail:
 if run is None:
     st.success('Đã đăng nhập Firebase. Bước tiếp theo: chuẩn bị chỉ mục trước khi bấm quay.')
     st.write('Demo tự gửi hai câu hỏi, hiển thị kết quả và nguồn, trình bày bốn bước Computational Thinking, đăng xuất và mở bảng kiểm thử.')
-    st.info('Phần phân tích chạy trong lúc chờ mô hình. Mục tiêu khoảng 4 phút 26 giây; có thể dài hơn nếu máy hoặc kết nối chậm. Không thay phản hồi thật bằng đáp án mẫu.')
+    st.info('Trình tự: demo hỏi–đáp → đăng xuất → bốn phần Computational Thinking → kiểm thử. Thời gian trình bày khoảng 3 phút 48 giây, cộng thời gian mô hình xử lý; có thể cần cắt gọn đoạn chờ để video dưới 5 phút.')
     if st.button('1. Chuẩn bị cẩm nang', type='primary'):
         try:
             with st.spinner('Đang tạo/lấy chỉ mục từ mô hình thật…'):
-                st.session_state.record_index = build_index((ROOT/'knowledge_base.json').read_text(encoding='utf-8'), current_url())
+                base_url = ollama_runtime.ensure_connection(current_url())
+                st.session_state.record_index = build_index((ROOT/'knowledge_base.json').read_text(encoding='utf-8'), base_url)
             st.success('Cẩm nang đã sẵn sàng.')
-        except (RagError, OSError) as exc:
+        except (RagError, OSError, ollama_runtime.ConnectionSetupError) as exc:
             st.error(str(exc))
     if 'record_index' in st.session_state:
         st.checkbox('Hiện nội dung thuyết trình', value=True, key='record_show_speech')
         if st.button('2. Bắt đầu — đếm ngược 8 giây để bấm quay', type='primary'):
-            st.session_state.record_run = DemoRun(scenes(ROOT/'docs/VIDEO_SCRIPT.md'), time.monotonic())
-            st.rerun()
+            try:
+                with st.spinner('Kiểm tra kết nối trước khi quay…'):
+                    ollama_runtime.ensure_connection(current_url())
+                st.session_state.record_run = DemoRun(scenes(ROOT/'docs/VIDEO_SCRIPT.md'), time.monotonic())
+                st.rerun()
+            except ollama_runtime.ConnectionSetupError as exc:
+                st.error(str(exc))
     st.stop()
 
 
@@ -130,6 +129,11 @@ def presentation():
     elapsed = max(0, now-run.epoch)
     if run.error:
         st.error(run.error)
+        if st.button('Thử lại câu hỏi'):
+            if run.retry(now, submit):
+                st.rerun()
+            else:
+                st.info('Tác vụ trước đang kết thúc hoặc phiên đã đăng xuất. Chờ thêm một chút rồi thử lại.')
         for kind in run.results:
             render_result(kind, run)
         return
@@ -137,10 +141,12 @@ def presentation():
     key = scene.key
     if key == 'intro':
         ui.intro()
+    elif key in ('ask_positive', 'positive_result', 'ask_negative', 'negative_result'):
+        ui.heading(QUESTIONS['positive' if 'positive' in key else 'negative'])
     else:
         ui.heading(scene.title)
     waiting = key in ('positive_result', 'negative_result') and key.removesuffix('_result') not in run.results
-    if st.session_state.get('record_show_speech', True) and not waiting:
+    if st.session_state.get('record_show_speech', True) and not waiting and key in ('intro', 'closing'):
         speech_start = run.events[-1].get('speech_at')
         if speech_start is not None:
             ui.narration(scene.speech, elapsed-speech_start, scene.seconds)
@@ -148,41 +154,30 @@ def presentation():
         ui.body('Streamlit · Firebase Authentication · Ollama + Pinggy · RAG', kind='footnote')
     elif key == 'auth':
         ui.body('Xác thực thành công', kind='answer')
-        ui.body('Đăng nhập → Truy cập chat → Đăng xuất và xóa lịch sử')
+        ui.body('Firebase Authentication bảo vệ quyền truy cập trang chat.')
     elif key in ('ask_positive', 'positive_result', 'ask_negative', 'negative_result'):
         kind = 'positive' if 'positive' in key else 'negative'
         render_result(kind, run)
     elif key == 'abstraction':
-        st.table([{'Trường': 'id', 'Vai trò': 'Định danh để trích dẫn, ví dụ G02'},
-                  {'Trường': 'title, text', 'Vai trò': 'Embedding và dữ kiện trả lời'},
-                  {'Trường': 'source', 'Vai trò': 'URL nguồn để đối chiếu'},
-                  {'Trường': 'category, tags', 'Vai trò': 'Chuẩn bị cho bài RAG-Rec'}])
+        ui.cards([('Đầu vào', 'Câu hỏi du lịch TP.HCM\nNgười dùng đã đăng nhập'),
+                  ('Đầu ra', 'Câu trả lời kèm nguồn\nHoặc thông báo thiếu dữ kiện')])
+        ui.body('16 mục · id / title / text / source · category / tags cho địa điểm', kind='footnote')
     elif key == 'decomposition':
-        st.graphviz_chart('''digraph { rankdir=LR; bgcolor="transparent";
-        node [shape=box,style=rounded,fontname="Arial",fontsize=18];
-        a [label="Đăng nhập\nEmail + mật khẩu → phiên"];
-        b [label="Embedding\nCâu hỏi → vector"];
-        c [label="Truy xuất\nVectors → 3 mục + điểm"];
-        d [label="Ghép context\nCâu hỏi + mục → prompt"];
-        e [label="Sinh đáp án\nPrompt → JSON"];
-        f [label="Hiển thị\nJSON + nguồn → chat"];
-        a -> b -> c -> d -> e -> f; }''')
+        ui.pipeline()
         ui.body('Cẩm nang JSON → embedding một lần → cache chỉ mục')
     elif key == 'pattern':
-        st.table([{'Nguồn': 'Lab 3', 'Tái sử dụng': 'Streamlit, session state, Firebase Authentication'},
-                  {'Nguồn': 'Lab 4', 'Tái sử dụng': 'Ollama + Pinggy, embedding, RAG'}])
+        ui.cards([('Lab 3', 'Streamlit · Firebase · session state'),
+                  ('Lab 4', 'Ollama + Pinggy · embedding · RAG')])
         ui.body('filter → score → top-k', kind='answer')
         ui.body('RAG-Rec: lọc category / tags → chấm điểm → chọn địa điểm')
     elif key == 'algorithm':
-        st.code('''nếu chưa đăng nhập hoặc câu hỏi rỗng: dừng
-index = lấy chỉ mục cẩm nang đã cache
-vector = embeddinggemma(câu hỏi)
-entries = top_3(cosine(vector, index))
-context = ghép câu hỏi và entries
-result = qwen3:4b(context, chỉ dùng dữ kiện trong context)
-nếu thiếu dữ kiện: trả lời không biết
-kiểm tra IDs thuộc entries, bổ sung dấu trích dẫn hợp lệ
-hiển thị câu trả lời và nguồn; lưu lịch sử trong session''', language='text')
+        st.code('''1. Kiểm tra đăng nhập và câu hỏi
+2. Lấy chỉ mục cẩm nang đã cache
+3. Embedding câu hỏi → tính cosine → lấy top-3
+4. Ghép context → gọi qwen3:4b
+5. Thiếu dữ kiện → trả lời không biết
+6. Kiểm tra ID nguồn → hiển thị đáp án
+7. Lưu hội thoại trong session''', language='text')
         ui.body('k = 3 · Context gọn · Giảm nhu cầu bộ nhớ')
     elif key == 'logout':
         ui.body('Đã đăng xuất', kind='answer')

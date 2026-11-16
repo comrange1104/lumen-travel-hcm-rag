@@ -18,8 +18,11 @@ TMP = ROOT/'tmp'
 def healthy(url):
     try:
         response = requests.get(url, timeout=(3, 5))
+        if url.endswith('/api/tags'):
+            data = response.json()
+            return response.ok and isinstance(data, dict) and isinstance(data.get('models'), list)
         return response.ok
-    except requests.RequestException:
+    except (requests.RequestException, ValueError):
         return False
 
 
@@ -30,7 +33,7 @@ def start_hidden(command, name):
                             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
 
 
-def ensure_services():
+def ensure_services(verbose=True):
     TMP.mkdir(exist_ok=True)
     values = dotenv_values(ROOT/'.env')
     if not values.get('FIREBASE_API_KEY') or not values.get('FIREBASE_PROJECT_ID'):
@@ -39,7 +42,8 @@ def ensure_services():
         executable = shutil.which('ollama') or str(Path(os.environ.get('LOCALAPPDATA', ''))/'Programs/Ollama/ollama.exe')
         if not Path(executable).exists():
             raise RuntimeError('Chưa tìm thấy Ollama. Cài Ollama và tải hai mô hình theo README.')
-        print('Đang khởi động Ollama…', flush=True)
+        if verbose:
+            print('Đang khởi động Ollama…', flush=True)
         start_hidden([executable, 'serve'], 'recording-ollama')
         for _ in range(40):
             if healthy('http://127.0.0.1:11434/api/tags'):
@@ -56,7 +60,8 @@ def ensure_services():
         raise RuntimeError('Cần tải mô hình: ollama pull embeddinggemma và ollama pull qwen3:4b.')
     base = (values.get('OLLAMA_BASE_URL') or '').rstrip('/')
     if not (base.startswith('https://') and healthy(base+'/api/tags')):
-        print('Đang tạo lại tunnel Pinggy…', flush=True)
+        if verbose:
+            print('Đang tạo lại tunnel Pinggy…', flush=True)
         key = TMP/'pinggy_key'
         if not key.exists():
             subprocess.run(['ssh-keygen', '-q', '-t', 'ed25519', '-f', str(key), '-N', ''], check=True)
@@ -76,7 +81,9 @@ def ensure_services():
             time.sleep(.5)
         else:
             raise RuntimeError('Pinggy chưa sẵn sàng. Chạy lại launcher hoặc kiểm tra Internet.')
-    print('Firebase có cấu hình; Ollama và Pinggy đã kết nối.', flush=True)
+    if verbose:
+        print('Firebase có cấu hình; Ollama và Pinggy đã kết nối.', flush=True)
+    return base
 
 
 def main():
