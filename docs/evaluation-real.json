@@ -1,0 +1,547 @@
+[
+  {
+    "id": "T01",
+    "type": "answerable",
+    "question": "Dinh Độc Lập do ai thiết kế?",
+    "expected_ids": [
+      "G02"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "Ngô Viết Thụ"
+    ],
+    "answer": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế [G02]",
+    "source_ids": [
+      "G02"
+    ],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G02",
+          "title": "Dinh Độc Lập",
+          "text": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế. Du khách có thể tìm hiểu các phòng họp và khu chỉ huy dưới tầng hầm.",
+          "source": "https://vietnam.travel/things-to-do/7-must-see-attractions-hcmc/",
+          "category": "historical_site",
+          "tags": [
+            "kiến trúc",
+            "lịch sử",
+            "Ngô Viết Thụ"
+          ]
+        },
+        "score": 0.7216234307554197
+      },
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.3850691288701581
+      },
+      {
+        "entry": {
+          "id": "G06",
+          "title": "Nhà hát Thành phố",
+          "text": "Nhà hát Thành phố là một điểm kiến trúc trên tuyến dạo bộ qua đường Đồng Khởi. Nhà hát có các chương trình biểu diễn nghệ thuật.",
+          "source": "https://vietnam.travel/things-to-do/ho-chi-minh-city-itinerary/",
+          "category": "theatre",
+          "tags": [
+            "biểu diễn",
+            "Đồng Khởi",
+            "kiến trúc"
+          ]
+        },
+        "score": 0.3814128610444461
+      }
+    ],
+    "status": "answered",
+    "model_output": {
+      "answerable": true,
+      "answer": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế",
+      "citations": [
+        "G02"
+      ]
+    },
+    "retrieved_ids": [
+      "G02",
+      "G10",
+      "G06"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 78.9
+  },
+  {
+    "id": "T02",
+    "type": "answerable",
+    "question": "Bảo tàng Mỹ thuật TP.HCM trưng bày những gì?",
+    "expected_ids": [
+      "G10"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "gốm",
+      "điêu khắc"
+    ],
+    "answer": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. [G10]",
+    "source_ids": [
+      "G10"
+    ],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.8020540843405962
+      },
+      {
+        "entry": {
+          "id": "G09",
+          "title": "Bảo tàng Lịch sử TP.HCM",
+          "text": "Bảo tàng Lịch sử TP.HCM giới thiệu lịch sử, văn hóa Việt Nam qua nhiều thời kỳ. Các bộ sưu tập còn phản ánh văn hóa Nam Bộ và một số nước châu Á.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "hiện vật",
+            "lịch sử",
+            "Nam Bộ"
+          ]
+        },
+        "score": 0.6961177681885853
+      },
+      {
+        "entry": {
+          "id": "G03",
+          "title": "Bảo tàng Chứng tích Chiến tranh",
+          "text": "Bảo tàng Chứng tích Chiến tranh trưng bày tư liệu, hình ảnh về hậu quả chiến tranh. Sân bảo tàng có máy bay, xe tăng và trực thăng.",
+          "source": "https://vietnam.travel/things-to-do/7-must-see-attractions-hcmc/",
+          "category": "museum",
+          "tags": [
+            "lịch sử",
+            "chiến tranh",
+            "tư liệu"
+          ]
+        },
+        "score": 0.6550914445377939
+      }
+    ],
+    "status": "answered",
+    "model_output": {
+      "answerable": true,
+      "answer": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm.",
+      "citations": [
+        "G10"
+      ]
+    },
+    "retrieved_ids": [
+      "G10",
+      "G09",
+      "G03"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 47.61
+  },
+  {
+    "id": "T03",
+    "type": "answerable",
+    "question": "TP.HCM thường có mưa vào những tháng nào?",
+    "expected_ids": [
+      "G14"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "5",
+      "11"
+    ],
+    "answer": "Tháng 5 đến tháng 11 [G14]",
+    "source_ids": [
+      "G14"
+    ],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G14",
+          "title": "Thời tiết và mùa du lịch TP.HCM",
+          "text": "TP.HCM nóng quanh năm. Mùa khô thường từ tháng 12 đến tháng 4; tháng 5 đến tháng 11 thường có mưa rào buổi chiều.",
+          "source": "https://vietnam.travel/place-to-go/southeastern-vietnam/ho-chi-minh-city/",
+          "category": "guide",
+          "tags": [
+            "mùa mưa",
+            "mùa khô",
+            "khí hậu"
+          ]
+        },
+        "score": 0.8011791612745558
+      },
+      {
+        "entry": {
+          "id": "G15",
+          "title": "Ứng xử khi tham quan đền chùa",
+          "text": "Khi tham quan đền chùa tại TP.HCM, nên mặc trang phục kín đáo, bỏ mũ và tháo giày khi vào nơi thờ tự theo hướng dẫn tại chỗ.",
+          "source": "https://vietnam.travel/things-to-do/vietnamese-etiquette-travellers/",
+          "category": "guide",
+          "tags": [
+            "văn hóa",
+            "trang phục",
+            "đền chùa"
+          ]
+        },
+        "score": 0.44236963293131015
+      },
+      {
+        "entry": {
+          "id": "G09",
+          "title": "Bảo tàng Lịch sử TP.HCM",
+          "text": "Bảo tàng Lịch sử TP.HCM giới thiệu lịch sử, văn hóa Việt Nam qua nhiều thời kỳ. Các bộ sưu tập còn phản ánh văn hóa Nam Bộ và một số nước châu Á.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "hiện vật",
+            "lịch sử",
+            "Nam Bộ"
+          ]
+        },
+        "score": 0.38570678727018337
+      }
+    ],
+    "status": "answered",
+    "model_output": {
+      "answerable": true,
+      "answer": "Tháng 5 đến tháng 11",
+      "citations": [
+        "G14"
+      ]
+    },
+    "retrieved_ids": [
+      "G14",
+      "G15",
+      "G09"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 41.86
+  },
+  {
+    "id": "T04",
+    "type": "paraphrase",
+    "question": "Ai là kiến trúc sư thiết kế công trình Dinh Độc Lập?",
+    "expected_ids": [
+      "G02"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "Ngô Viết Thụ"
+    ],
+    "answer": "Ngô Viết Thụ [G02]",
+    "source_ids": [
+      "G02"
+    ],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G02",
+          "title": "Dinh Độc Lập",
+          "text": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế. Du khách có thể tìm hiểu các phòng họp và khu chỉ huy dưới tầng hầm.",
+          "source": "https://vietnam.travel/things-to-do/7-must-see-attractions-hcmc/",
+          "category": "historical_site",
+          "tags": [
+            "kiến trúc",
+            "lịch sử",
+            "Ngô Viết Thụ"
+          ]
+        },
+        "score": 0.7811038578818693
+      },
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.3986878198465152
+      },
+      {
+        "entry": {
+          "id": "G06",
+          "title": "Nhà hát Thành phố",
+          "text": "Nhà hát Thành phố là một điểm kiến trúc trên tuyến dạo bộ qua đường Đồng Khởi. Nhà hát có các chương trình biểu diễn nghệ thuật.",
+          "source": "https://vietnam.travel/things-to-do/ho-chi-minh-city-itinerary/",
+          "category": "theatre",
+          "tags": [
+            "biểu diễn",
+            "Đồng Khởi",
+            "kiến trúc"
+          ]
+        },
+        "score": 0.3964905966431761
+      }
+    ],
+    "status": "answered",
+    "model_output": {
+      "answerable": true,
+      "answer": "Ngô Viết Thụ",
+      "citations": [
+        "G02"
+      ]
+    },
+    "retrieved_ids": [
+      "G02",
+      "G10",
+      "G06"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 34.27
+  },
+  {
+    "id": "T05",
+    "type": "outside",
+    "question": "Giá vé máy bay từ TP.HCM đi Tokyo ngày mai là bao nhiêu?",
+    "expected_ids": [],
+    "expected_answerable": false,
+    "keywords": [],
+    "answer": "Mình không có thông tin này trong cẩm nang.",
+    "source_ids": [],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G13",
+          "title": "Di chuyển từ sân bay Tân Sơn Nhất",
+          "text": "Từ sân bay Tân Sơn Nhất, du khách có thể đi taxi, đặt xe qua ứng dụng hoặc dùng xe buýt vào thành phố.",
+          "source": "https://vietnam.travel/place-to-go/southeastern-vietnam/ho-chi-minh-city/",
+          "category": "guide",
+          "tags": [
+            "sân bay",
+            "di chuyển",
+            "xe buýt"
+          ]
+        },
+        "score": 0.48656577112295385
+      },
+      {
+        "entry": {
+          "id": "G15",
+          "title": "Ứng xử khi tham quan đền chùa",
+          "text": "Khi tham quan đền chùa tại TP.HCM, nên mặc trang phục kín đáo, bỏ mũ và tháo giày khi vào nơi thờ tự theo hướng dẫn tại chỗ.",
+          "source": "https://vietnam.travel/things-to-do/vietnamese-etiquette-travellers/",
+          "category": "guide",
+          "tags": [
+            "văn hóa",
+            "trang phục",
+            "đền chùa"
+          ]
+        },
+        "score": 0.4756987914025872
+      },
+      {
+        "entry": {
+          "id": "G14",
+          "title": "Thời tiết và mùa du lịch TP.HCM",
+          "text": "TP.HCM nóng quanh năm. Mùa khô thường từ tháng 12 đến tháng 4; tháng 5 đến tháng 11 thường có mưa rào buổi chiều.",
+          "source": "https://vietnam.travel/place-to-go/southeastern-vietnam/ho-chi-minh-city/",
+          "category": "guide",
+          "tags": [
+            "mùa mưa",
+            "mùa khô",
+            "khí hậu"
+          ]
+        },
+        "score": 0.4308796925476159
+      }
+    ],
+    "status": "unknown",
+    "model_output": {
+      "answerable": false,
+      "answer": "",
+      "citations": []
+    },
+    "retrieved_ids": [
+      "G13",
+      "G15",
+      "G14"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 30.95
+  },
+  {
+    "id": "T06",
+    "type": "outside",
+    "question": "Bảo tàng Mỹ thuật TP.HCM mở cửa lúc mấy giờ vào Chủ nhật?",
+    "expected_ids": [],
+    "expected_answerable": false,
+    "keywords": [],
+    "answer": "Mình không có thông tin này trong cẩm nang.",
+    "source_ids": [],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.6069890796953225
+      },
+      {
+        "entry": {
+          "id": "G09",
+          "title": "Bảo tàng Lịch sử TP.HCM",
+          "text": "Bảo tàng Lịch sử TP.HCM giới thiệu lịch sử, văn hóa Việt Nam qua nhiều thời kỳ. Các bộ sưu tập còn phản ánh văn hóa Nam Bộ và một số nước châu Á.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "hiện vật",
+            "lịch sử",
+            "Nam Bộ"
+          ]
+        },
+        "score": 0.564555379483991
+      },
+      {
+        "entry": {
+          "id": "G15",
+          "title": "Ứng xử khi tham quan đền chùa",
+          "text": "Khi tham quan đền chùa tại TP.HCM, nên mặc trang phục kín đáo, bỏ mũ và tháo giày khi vào nơi thờ tự theo hướng dẫn tại chỗ.",
+          "source": "https://vietnam.travel/things-to-do/vietnamese-etiquette-travellers/",
+          "category": "guide",
+          "tags": [
+            "văn hóa",
+            "trang phục",
+            "đền chùa"
+          ]
+        },
+        "score": 0.4356228397126194
+      }
+    ],
+    "status": "unknown",
+    "model_output": {
+      "answerable": false,
+      "answer": "",
+      "citations": []
+    },
+    "retrieved_ids": [
+      "G10",
+      "G09",
+      "G15"
+    ],
+    "passed_automatic": true,
+    "failure_stage": "",
+    "seconds": 53.84
+  },
+  {
+    "id": "E01",
+    "type": "multi_entry",
+    "question": "Liệt kê bốn bảo tàng có trong cẩm nang và chủ đề trưng bày của từng bảo tàng.",
+    "expected_ids": [
+      "G03",
+      "G08",
+      "G09",
+      "G10"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "Chứng tích",
+      "Áo dài",
+      "Lịch sử",
+      "Mỹ thuật"
+    ],
+    "answer": "Mình không có thông tin này trong cẩm nang.",
+    "source_ids": [],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G03",
+          "title": "Bảo tàng Chứng tích Chiến tranh",
+          "text": "Bảo tàng Chứng tích Chiến tranh trưng bày tư liệu, hình ảnh về hậu quả chiến tranh. Sân bảo tàng có máy bay, xe tăng và trực thăng.",
+          "source": "https://vietnam.travel/things-to-do/7-must-see-attractions-hcmc/",
+          "category": "museum",
+          "tags": [
+            "lịch sử",
+            "chiến tranh",
+            "tư liệu"
+          ]
+        },
+        "score": 0.5652966962346382
+      },
+      {
+        "entry": {
+          "id": "G09",
+          "title": "Bảo tàng Lịch sử TP.HCM",
+          "text": "Bảo tàng Lịch sử TP.HCM giới thiệu lịch sử, văn hóa Việt Nam qua nhiều thời kỳ. Các bộ sưu tập còn phản ánh văn hóa Nam Bộ và một số nước châu Á.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "hiện vật",
+            "lịch sử",
+            "Nam Bộ"
+          ]
+        },
+        "score": 0.5389131536346405
+      },
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.5187788172933926
+      }
+    ],
+    "status": "rejected_citations",
+    "model_output": {
+      "answerable": true,
+      "answer": "Bảo tàng Chứng tích Chiến tranh [G03]: trưng bày tư liệu, hình ảnh về hậu quả chiến tranh và có máy bay, xe tăng, trực thăng; Bảo tàng Lịch sử TP.HCM [G09]: giới thiệu lịch sử, văn hóa Việt Nam qua nhiều thời kỳ và phản ánh văn hóa Nam Bộ, một số nước châu Á; Bảo tàng Mỹ thuật TP: trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm; Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+      "citations": [
+        "G03",
+        "G09",
+        "G10"
+      ]
+    },
+    "retrieved_ids": [
+      "G03",
+      "G09",
+      "G10"
+    ],
+    "passed_automatic": false,
+    "failure_stage": "retrieval",
+    "seconds": 79.67
+  }
+]

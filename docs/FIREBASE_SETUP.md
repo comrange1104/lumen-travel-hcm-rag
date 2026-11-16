@@ -11,7 +11,7 @@ Chỉ cần Firebase Authentication. Không tạo Firestore hay tải khóa serv
 7. Tại thư mục dự án, mở PowerShell và chạy:
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
 notepad .env
 ```
 
@@ -21,9 +21,12 @@ notepad .env
 FIREBASE_API_KEY=gia_tri_apiKey_tu_firebase
 FIREBASE_PROJECT_ID=gia_tri_projectId_tu_firebase
 OLLAMA_BASE_URL=https://URL-HTTPS-duoc-Pinggy-cap
+OLLAMA_NUM_GPU=0
 ```
 
-8. Lưu tệp. Nếu Streamlit đang chạy, dừng bằng Ctrl+C và chạy lại.
+Giữ nguyên URL Ollama đã điền sẵn nếu tunnel hiện tại còn chạy. `OLLAMA_NUM_GPU=0` là chế độ CPU đã dùng để kiểm tra trên máy này.
+
+8. Lưu tệp. Nếu Streamlit đang chạy, dừng bằng Ctrl+C và chạy lại. Nếu app chạy ẩn, mở terminal riêng và chạy `streamlit run app.py --server.port 8502` từ môi trường ảo để dùng cấu hình mới.
 9. Trên ứng dụng chọn **Đăng ký**, dùng email và mật khẩu thử nghiệm ít nhất 6 ký tự. Đợi báo thành công, chọn **Đăng nhập** rồi nhập lại.
 10. Trong Firebase → Authentication → Users sẽ thấy tài khoản vừa đăng ký.
 

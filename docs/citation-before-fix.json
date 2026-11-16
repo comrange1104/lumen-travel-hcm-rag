@@ -1,0 +1,79 @@
+[
+  {
+    "id": "T01",
+    "type": "answerable",
+    "question": "Dinh Độc Lập do ai thiết kế?",
+    "expected_ids": [
+      "G02"
+    ],
+    "expected_answerable": true,
+    "keywords": [
+      "Ngô Viết Thụ"
+    ],
+    "answer": "Mình không có thông tin này trong cẩm nang.",
+    "source_ids": [],
+    "retrieved_entries": [
+      {
+        "entry": {
+          "id": "G02",
+          "title": "Dinh Độc Lập",
+          "text": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế. Du khách có thể tìm hiểu các phòng họp và khu chỉ huy dưới tầng hầm.",
+          "source": "https://vietnam.travel/things-to-do/7-must-see-attractions-hcmc/",
+          "category": "historical_site",
+          "tags": [
+            "kiến trúc",
+            "lịch sử",
+            "Ngô Viết Thụ"
+          ]
+        },
+        "score": 0.7216234307554197
+      },
+      {
+        "entry": {
+          "id": "G10",
+          "title": "Bảo tàng Mỹ thuật TP.HCM",
+          "text": "Bảo tàng Mỹ thuật TP.HCM trưng bày mỹ thuật Nam Bộ, nghệ thuật đương đại, gốm Việt Nam và điêu khắc Chăm. Kiến trúc tòa nhà kết hợp nét Đông và Tây.",
+          "source": "https://vietnam.travel/things-to-do/10-tourist-spots-not-be-missed-ho-chi-minh-city/",
+          "category": "museum",
+          "tags": [
+            "mỹ thuật",
+            "gốm",
+            "điêu khắc"
+          ]
+        },
+        "score": 0.3850691288701581
+      },
+      {
+        "entry": {
+          "id": "G06",
+          "title": "Nhà hát Thành phố",
+          "text": "Nhà hát Thành phố là một điểm kiến trúc trên tuyến dạo bộ qua đường Đồng Khởi. Nhà hát có các chương trình biểu diễn nghệ thuật.",
+          "source": "https://vietnam.travel/things-to-do/ho-chi-minh-city-itinerary/",
+          "category": "theatre",
+          "tags": [
+            "biểu diễn",
+            "Đồng Khởi",
+            "kiến trúc"
+          ]
+        },
+        "score": 0.3814128610444461
+      }
+    ],
+    "status": "rejected_citations",
+    "model_output": {
+      "answerable": true,
+      "answer": "Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế",
+      "citations": [
+        "G02"
+      ]
+    },
+    "retrieved_ids": [
+      "G02",
+      "G10",
+      "G06"
+    ],
+    "passed_automatic": false,
+    "failure_stage": "generation",
+    "seconds": 44.74
+  }
+]

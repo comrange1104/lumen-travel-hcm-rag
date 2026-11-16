@@ -27,7 +27,7 @@ Trước khi quay: chạy Ollama, tạo tunnel Pinggy mới, kiểm tra URL tron
 
 - Mở bảng kết quả thật đã được người đọc duyệt.
 - Nêu một câu thành công, ID kỳ vọng và ID đã truy xuất.
-- Chọn một lỗi thực tế trong quá trình chạy: trình bày câu hỏi, kết quả và lỗi ở dữ liệu, retrieval hay generation. Nếu đã sửa, chỉ rõ kết quả trước/sau sửa.
+- Dùng lỗi đã ghi nhận tại `docs/FAILURE_ANALYSIS.md`: T01 truy xuất đúng G02, mô hình trả đúng Ngô Viết Thụ và danh sách ID nhưng thiếu `[G02]` trong văn bản, khiến kiểm tra cũ từ chối đáp án. Mở `citation-before-fix.json`, rồi đối chiếu T01 sau sửa trong `evaluation-real.json`. Nêu cách sửa: thêm trích dẫn từ danh sách ID đã kiểm tra hợp lệ. Không dùng lỗi này làm ví dụ retrieval sai.
 - Nếu chưa ghi nhận lỗi RAG thực tế, tiếp tục thử câu hỏi phức tạp và ghi nhận; không tự tạo số liệu hay dùng lỗi mô phỏng như kết quả thật.
 - Kết: “Ứng dụng có giới hạn bộ dữ liệu nhỏ, thông tin tĩnh và thời gian xử lý phụ thuộc máy và tunnel.”
 

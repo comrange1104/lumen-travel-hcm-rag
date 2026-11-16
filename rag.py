@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import numpy as np
 import requests
 import streamlit as st
+from config import OLLAMA_NUM_GPU
 
 UNKNOWN = 'Mình không có thông tin này trong cẩm nang.'
 EMBED_MODEL = 'embeddinggemma'
@@ -45,6 +46,12 @@ class OllamaClient:
         if urlparse(base_url).scheme not in ('http', 'https') or not urlparse(base_url).netloc:
             raise RagError('Chưa có URL Ollama hợp lệ. Điền OLLAMA_BASE_URL trong .env rồi khởi động lại app.')
         self.base_url = base_url.rstrip('/')
+        try:
+            self.device_options = {'num_gpu': int(OLLAMA_NUM_GPU)} if OLLAMA_NUM_GPU else {}
+            if OLLAMA_NUM_GPU and int(OLLAMA_NUM_GPU) < 0:
+                raise ValueError
+        except ValueError:
+            raise RagError('OLLAMA_NUM_GPU cần để trống hoặc là số nguyên không âm; 0 để chạy CPU.') from None
 
     def _post(self, endpoint, payload):
         try:
@@ -63,7 +70,7 @@ class OllamaClient:
     def embed(self, texts):
         with MODEL_LOCK:
             data = self._post('/api/embed', {'model': EMBED_MODEL, 'input': texts,
-                                           'truncate': False, 'keep_alive': 0})
+                                           'truncate': False, 'keep_alive': 0, 'options': self.device_options})
         try:
             vectors = np.asarray(data['embeddings'], dtype=float)
             if vectors.ndim != 2 or vectors.shape[0] != len(texts) or not np.isfinite(vectors).all():
@@ -88,7 +95,7 @@ Trả JSON: {"answerable": boolean, "answer": string, "citations": ["G01"]}.'''
                        'answerable': {'type': 'boolean'}, 'answer': {'type': 'string'},
                        'citations': {'type': 'array', 'items': {'type': 'string'}}},
                        'required': ['answerable', 'answer', 'citations'], 'additionalProperties': False},
-                   'options': {'temperature': 0, 'num_ctx': 4096, 'num_predict': 512},
+                   'options': {'temperature': 0, 'num_ctx': 4096, 'num_predict': 512, **self.device_options},
                    'messages': [{'role': 'system', 'content': system},
                                 {'role': 'user', 'content': f'CONTEXT:\n{context}\n\nCÂU HỎI:\n{question}'}]}
         with MODEL_LOCK:
@@ -148,8 +155,12 @@ def validate_answer(data, retrieved):
     if not isinstance(answer, str) or not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
         raise RagError('Mô hình trả kết quả sai định dạng.')
     cited = set(re.findall(r'\[(G\d+)\]', answer))
-    if not answer.strip() or not ids or not cited or set(ids) != cited or not cited <= allowed:
+    if not answer.strip() or not ids or not set(ids) <= allowed or (cited and set(ids) != cited):
         return UNKNOWN, [], 'rejected_citations'
+    # Structured IDs are validated first. The model sometimes omits inline
+    # brackets despite returning the correct source_ids; render them reliably.
+    if not cited:
+        answer = answer.rstrip() + ' ' + ' '.join(f'[{i}]' for i in dict.fromkeys(ids))
     return answer, list(dict.fromkeys(ids)), 'answered'
 
 

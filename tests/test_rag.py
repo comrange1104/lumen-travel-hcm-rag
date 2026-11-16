@@ -29,11 +29,13 @@ class RagTests(unittest.TestCase):
 
     def test_citations_must_match_retrieved_ids(self):
         retrieved = [{'entry': self.entries[0], 'score': 1}]
-        for answer, ids in [('Thông tin [G99]', ['G99']), ('Thông tin', ['G01']), ('Thông tin [G01]', ['G02'])]:
+        for answer, ids in [('Thông tin [G99]', ['G99']), ('Thông tin', []), ('Thông tin [G01]', ['G02'])]:
             result = validate_answer({'answerable': True, 'answer': answer, 'citations': ids}, retrieved)
             self.assertEqual(result[0], UNKNOWN)
         good = validate_answer({'answerable': True, 'answer': 'Thông tin [G01]', 'citations': ['G01']}, retrieved)
         self.assertEqual(good[2], 'answered')
+        formatted = validate_answer({'answerable': True, 'answer': 'Thông tin', 'citations': ['G01']}, retrieved)
+        self.assertEqual(formatted[0], 'Thông tin [G01]')
 
     def test_unknown_never_keeps_generated_guess(self):
         self.assertEqual(validate_answer({'answerable': False, 'answer': 'Giá 999 đồng', 'citations': []}, [])[0], UNKNOWN)

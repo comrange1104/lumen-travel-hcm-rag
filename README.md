@@ -8,7 +8,7 @@ Streamlit + Firebase Authentication + Ollama RAG. Cẩm nang 16 mục tiếng Vi
 
 - Mã nguồn, dữ liệu và kịch bản video đã có trong repo. **12/12 kiểm thử tự động đã đạt ngày 16/11/2026** trên Python 3.12, bao gồm Streamlit AppTest với Firebase giả lập; đây chưa phải xác nhận Firebase/mô hình thật.
 - Cần cấu hình Firebase và xác minh đăng nhập thật bằng tài khoản của sinh viên.
-- Kết quả sáu câu hỏi với mô hình thật sẽ được ghi sau khi server đã chạy; bảng dưới không giả định đã đạt.
+- **6/6 câu hỏi chính đã đạt ngày 16/11/2026 qua Pinggy, embeddinggemma và qwen3:4b chạy CPU.** Codex đã đối chiếu câu trả lời với cẩm nang; sinh viên cần duyệt trước khi nộp. Bằng chứng: [kết quả thật](docs/evaluation-real.json).
 - **Video:** CHƯA CÓ — sinh viên quay theo `docs/VIDEO_SCRIPT.md`, tải lên và thay dòng này bằng link xem được.
 - **GitHub công khai:** https://github.com/comrange1104/lumen-travel-hcm-rag
 
@@ -19,7 +19,7 @@ Dùng **Python 3.12** và PowerShell tại thư mục dự án:
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-Copy-Item .env.example .env
+if (-not (Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
 ```
 
 Nếu đã có `.env`, giữ lại cấu hình đã điền. Hướng dẫn Firebase cho người mới: [Tạo Firebase từng bước](docs/FIREBASE_SETUP.md).
@@ -42,13 +42,15 @@ powershell -ExecutionPolicy Bypass -File scripts/start-pinggy.ps1
 
 Chép URL HTTPS được cấp vào `OLLAMA_BASE_URL` trong `.env`. Điền `FIREBASE_API_KEY`, `FIREBASE_PROJECT_ID` từ Firebase Web config. Khởi động lại Streamlit sau khi đổi `.env`:
 
+**Riêng máy GTX 1650 hiện tại:** đặt thêm `OLLAMA_NUM_GPU=0` trong `.env` để chạy CPU. Lần chạy thực tế đã gặp `CUDA error: shared object initialization failed` khi dùng CUDA; CPU chạy được nhưng có độ trễ cao hơn. Trên máy khác có thể để biến này trống để Ollama tự chọn GPU. Lần chẩn đoán T01 bằng CPU mất 44,74 giây, chưa tính bước tạo chỉ mục toàn cẩm nang.
+
 ```powershell
 .\.venv\Scripts\streamlit.exe run app.py
 ```
 
 Mở http://localhost:8501. Lệnh chuẩn của đề là `streamlit run app.py` khi môi trường ảo đã được kích hoạt. Đăng ký tài khoản rồi đăng nhập. Chỉ người đăng nhập mới được hỏi. Đăng xuất xóa lịch sử phiên; không có Firestore hay database.
 
-Pinggy miễn phí có giới hạn phiên; URL thay đổi khi mở lại tunnel. Khi mất kết nối, mở tunnel mới, cập nhật `.env` và khởi động lại app. Đối chiếu tại https://pinggy.io/docs/.
+Pinggy miễn phí có giới hạn phiên; URL thay đổi khi mở lại tunnel. Khi mất kết nối, mở tunnel mới, cập nhật `.env` và khởi động lại app. Script tạo khóa SSH riêng trong `tmp/` (đã được Git bỏ qua) để tránh lời nhắc mật khẩu, và dùng `u:Host:localhost:11434` để Ollama nhận đúng Host header. Thiếu tùy chọn này đã gây HTTP 403 trong lần kiểm tra thực tế và đã được sửa. Đối chiếu [hướng dẫn chính thức cho Ollama](https://pinggy.io/quickstart/ollama-api/).
 
 ## Kiến trúc và Computational Thinking
 
@@ -82,7 +84,8 @@ vector_q = embeddinggemma(câu hỏi)
 mục = top_3(cosine(vector_q, ma_trận_cẩm_nang))
 phản_hồi = qwen3:4b(câu hỏi, context=mục, chỉ dùng context)
 nếu phản_hồi báo thiếu dữ kiện: trả câu không biết cố định
-nếu ID thiếu, không khớp hoặc ngoài mục đã truy xuất: từ chối đáp án
+nếu danh sách ID thiếu, không khớp hoặc ngoài mục đã truy xuất: từ chối đáp án
+nếu danh sách ID hợp lệ nhưng văn bản thiếu dấu trích dẫn: thêm [Gxx] từ danh sách
 ngược lại: hiển thị đáp án, IDs, ba mục và điểm
 lưu hội thoại trong session hiện tại
 ```
@@ -112,14 +115,18 @@ Lệnh đầu kiểm tra dữ liệu, cosine, trích dẫn, câu hỏi trống v
 
 | Test | Câu hỏi | ID kỳ vọng | ID thực tế | Đúng/sai | Bước lỗi |
 |---|---|---|---|---|---|
-| T01 | Dinh Độc Lập do ai thiết kế? | G02 | Chưa chạy | Chưa đánh giá | — |
-| T02 | Bảo tàng Mỹ thuật TP.HCM trưng bày những gì? | G10 | Chưa chạy | Chưa đánh giá | — |
-| T03 | TP.HCM thường có mưa vào những tháng nào? | G14 | Chưa chạy | Chưa đánh giá | — |
-| T04 | Ai là kiến trúc sư thiết kế công trình Dinh Độc Lập? | G02 | Chưa chạy | Chưa đánh giá | — |
-| T05 | Giá vé máy bay từ TP.HCM đi Tokyo ngày mai là bao nhiêu? | Không có; phải nói không biết | Chưa chạy | Chưa đánh giá | — |
-| T06 | Bảo tàng Mỹ thuật TP.HCM mở cửa lúc mấy giờ vào Chủ nhật? | Không có dữ kiện giờ; phải nói không biết | Chưa chạy | Chưa đánh giá | — |
+| T01 | Dinh Độc Lập do ai thiết kế? | G02 | G02, G10, G06 | Đạt | — |
+| T02 | Bảo tàng Mỹ thuật TP.HCM trưng bày những gì? | G10 | G10, G09, G03 | Đạt | — |
+| T03 | TP.HCM thường có mưa vào những tháng nào? | G14 | G14, G15, G09 | Đạt | — |
+| T04 | Ai là kiến trúc sư thiết kế công trình Dinh Độc Lập? | G02 | G02, G10, G06 | Đạt | — |
+| T05 | Giá vé máy bay từ TP.HCM đi Tokyo ngày mai là bao nhiêu? | Không có; phải nói không biết | G13, G15, G14 | Đạt | — |
+| T06 | Bảo tàng Mỹ thuật TP.HCM mở cửa lúc mấy giờ vào Chủ nhật? | Không có dữ kiện giờ; phải nói không biết | G10, G09, G15 | Đạt | — |
+
+Đo trên máy hiện tại, CPU qua Pinggy: sáu câu mất từ 30.95 đến 78.9 giây/câu, trung vị 44.73 giây. Thời gian này chưa bao gồm tạo chỉ mục ban đầu. Có thể cắt gọn đoạn chờ khi quay video và ghi chú rõ. Xem [lỗi thực tế và cách sửa](docs/FAILURE_ANALYSIS.md).
 
 Khi sai: phân loại **missing data**, **retrieval**, **generation**; lỗi hạ tầng ghi riêng. Lưu cả kết quả lỗi trước khi sửa để giải thích trong video.
+
+**Kiểm thử mở rộng E01:** yêu cầu liệt kê bốn bảo tàng trong cẩm nang, nhưng top-3 chỉ lấy G03, G09, G10 và thiếu G08. Mô hình trả lời không biết; chưa đạt yêu cầu liệt kê đủ bốn. Phân loại **retrieval**, 79,67 giây. Đây là giới hạn đã công bố, không nằm trong sáu câu hỏi chính. Có thể chạy lại riêng bằng `python scripts/evaluate.py --cases exploratory_cases.json --output output/exploratory.json`.
 
 Kiểm tra thủ công cần thực hiện với Firebase thật:
 
@@ -135,6 +142,7 @@ Kiểm tra thủ công cần thực hiện với Firebase thật:
 
 - Cẩm nang nhỏ và tĩnh; không có giá vé, giờ mở cửa, giá chuyến bay hoặc dự báo trực tiếp.
 - Câu hỏi tiếp nối như “ở đó thì sao?” chưa được giải nghĩa từ lịch sử.
+- Câu hỏi tổng hợp cần hơn ba mục có thể bị từ chối vì context thiếu mục; E01 đã ghi nhận giới hạn này.
 - Mô hình có thể hiểu sai context dù trích dẫn đúng ID. Kiểm tra trích dẫn không thay thế việc kiểm chứng nội dung.
 - Độ trễ phụ thuộc GPU 4 GB, RAM 8 GB, tải mô hình và kết nối Pinggy. Lần đầu có chi phí tạo chỉ mục.
 - Cache bị xóa khi khởi động lại server; lịch sử bị xóa khi phiên kết thúc hoặc đăng xuất.
@@ -143,7 +151,7 @@ Kiểm tra thủ công cần thực hiện với Firebase thật:
 ## Checklist nộp bài
 
 - [ ] Duyệt dữ liệu và README; điền kết quả kiểm thử thực tế.
-- [ ] Tạo repository GitHub **Public** và đẩy source lên; kiểm tra `.env` không được theo dõi bằng `git check-ignore .env`.
+- [x] Tạo repository GitHub **Public** và đẩy source lên; `.env` được Git bỏ qua.
 - [ ] Quay video theo [kịch bản](docs/VIDEO_SCRIPT.md), dưới 5 phút.
 - [ ] Thêm link video, kiểm tra quyền xem bằng cửa sổ ẩn danh.
 - [ ] Kiểm tra lại repo public và hướng dẫn cài đặt từ đầu.
