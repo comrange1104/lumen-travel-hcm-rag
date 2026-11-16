@@ -1,0 +1,8 @@
+[
+ {"id":"T01","type":"answerable","question":"Dinh Độc Lập do ai thiết kế?","expected_ids":["G02"],"expected_answerable":true,"keywords":["Ngô Viết Thụ"]},
+ {"id":"T02","type":"answerable","question":"Bảo tàng Mỹ thuật TP.HCM trưng bày những gì?","expected_ids":["G10"],"expected_answerable":true,"keywords":["gốm","điêu khắc"]},
+ {"id":"T03","type":"answerable","question":"TP.HCM thường có mưa vào những tháng nào?","expected_ids":["G14"],"expected_answerable":true,"keywords":["5","11"]},
+ {"id":"T04","type":"paraphrase","question":"Ai là kiến trúc sư thiết kế công trình Dinh Độc Lập?","expected_ids":["G02"],"expected_answerable":true,"keywords":["Ngô Viết Thụ"]},
+ {"id":"T05","type":"outside","question":"Giá vé máy bay từ TP.HCM đi Tokyo ngày mai là bao nhiêu?","expected_ids":[],"expected_answerable":false,"keywords":[]},
+ {"id":"T06","type":"outside","question":"Bảo tàng Mỹ thuật TP.HCM mở cửa lúc mấy giờ vào Chủ nhật?","expected_ids":[],"expected_answerable":false,"keywords":[]}
+]
